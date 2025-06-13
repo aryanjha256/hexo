@@ -11,15 +11,42 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.direct.data.BatteryInfoProvider
 import com.example.direct.data.NetworkInfoProvider
 import com.example.direct.data.RamInfoProvider
+import kotlinx.coroutines.delay
 
 @Composable
 fun DashboardScreen(navController: NavController) {
+
+    val context = LocalContext.current
+
+    var battery by remember { mutableStateOf("Loading...") }
+    var ram by remember { mutableStateOf("0%") }
+    var net by remember { mutableStateOf("⬇️ 0 KB/s / ⬆️ 0 KB/s") }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            BatteryInfoProvider.getBatteryPercent().also { battery = it }
+
+            RamInfoProvider.update(context)
+            ram = "${RamInfoProvider.getRamUsedPercent()}%"
+
+            NetworkInfoProvider.update()
+            net = "⬇️ ${NetworkInfoProvider.downloadSpeedStr()} / ⬆️ ${NetworkInfoProvider.uploadSpeedStr()}"
+
+            delay(1000)
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -27,6 +54,10 @@ fun DashboardScreen(navController: NavController) {
     ) {
         Text("📊 Hexo Dashboard", style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(16.dp))
+
+        MetricTile("Battery", "🔋 $battery", onClick = { navController.navigate("battery") })
+        MetricTile("RAM Usage", "💾 $ram", onClick = { navController.navigate("ram") })
+        MetricTile("Network", net, onClick = { navController.navigate("network") })
 
         MetricTile(
             title = "Battery",

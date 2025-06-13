@@ -1,6 +1,6 @@
 package com.example.direct
 
-import DashboardScreen
+import MainScreen
 import NetworkSpeedMonitor
 import android.app.ActivityManager
 import android.content.BroadcastReceiver
@@ -14,10 +14,21 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Details
+import androidx.compose.material.icons.filled.DeveloperMode
+import androidx.compose.material.icons.filled.SettingsSuggest
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -30,10 +41,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.direct.ui.theme.DirectTheme
 import kotlinx.coroutines.delay
@@ -50,26 +60,34 @@ class MainActivity : ComponentActivity() {
 //                RealTimeRamMonitor()
 //                NetworkSpeedMonitor()
 
-                NavHost(navController = navController, startDestination = "dashboard") {
-                    composable("dashboard") { DashboardScreen(navController) }
-                    composable("battery") { BatteryDetailScreen() }
-                    composable("ram") { RamDetailScreen() }
-                    composable("network") { NetworkDetailScreen() }
-                }
+//                NavHost(navController = navController, startDestination = "dashboard") {
+//                    composable("dashboard") { DashboardScreen(navController) }
+//                    composable("battery") { BatteryDetailScreen() }
+//                    composable("ram") { RamDetailScreen() }
+//                    composable("network") { NetworkDetailScreen() }
+//                }
+                MainScreen()
             }
         }
     }
 }
+
+sealed class Screen(val route: String, val label: String, val icon: ImageVector) {
+    object Dashboard : Screen("dashboard", "Dashboard", Icons.Filled.DeveloperMode)
+    object Insights : Screen("insights", "Insights", Icons.Filled.Details)
+    object Settings : Screen("settings", "Settings", Icons.Filled.SettingsSuggest)
+}
+
 
 @Composable
 fun BatteryDetailScreen() {
     Text("🔋 Battery Detail View")
 }
 
-@Composable
-fun RamDetailScreen() {
-    Text("💾 RAM Detail View")
-}
+//@Composable
+//fun RamDetailScreen() {
+//
+//}
 
 @Composable
 fun NetworkDetailScreen() {
@@ -170,4 +188,34 @@ fun formatBytes(bytes: Long): String {
         else -> "$kb KB"
     }
 }
+
+
+@Composable
+fun StatCard(
+    icon: ImageVector,
+    title: String,
+    value: String,
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Row(modifier = Modifier.padding(16.dp)) {
+            Icon(
+                imageVector = icon,
+                contentDescription = title,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(32.dp)
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Column {
+                Text(title, style = MaterialTheme.typography.labelLarge)
+                Text(value, style = MaterialTheme.typography.bodyLarge)
+            }
+        }
+    }
+}
+
+
 
